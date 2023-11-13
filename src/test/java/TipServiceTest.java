@@ -1,14 +1,14 @@
-import lombok.extern.java.Log;
-import org.junit.jupiter.api.DisplayName;
-
-import static org.junit.jupiter.api.Assertions.*;
-
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.ot5usk.Tester;
 import org.ot5usk.TipService;
 
 import java.math.BigDecimal;
+
+import lombok.extern.java.Log;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @Log
 public class TipServiceTest {
@@ -36,23 +36,23 @@ public class TipServiceTest {
         return amount.multiply(multiplier);
     }
 
-    @DisplayName("Purchase amount of a thousand rubles or more")
+    @DisplayName("Purchase amount value of a thousand rubles or more")
     @ParameterizedTest
     @CsvSource({
             "1000, 1.05",
             "2000, 1.05",
     })
-    public void testRoundTips_WithAmountOfThousandOrMore_AmountShouldIncreasedByFivePercent(BigDecimal amount, BigDecimal multiplier) {
-        log((requirement) -> assertEquals(getExpectedAmount(amount, multiplier), tipService.roundTips(amount)), "The purchase amount must be five percent more");
+    public void testRoundTips_WithAmountOfThousandOrMore_ResultMustIncreasedByFivePercent(BigDecimal amount, BigDecimal multiplier) {
+        log((requirement) -> assertEquals(0, getExpectedAmount(amount, multiplier).compareTo(tipService.roundTips(amount))), "The purchase amount must be five percent more");
     }
 
-    @DisplayName("The purchase amount is less than a thousand rubles")
+    @DisplayName("The purchase amount value is less than a thousand rubles")
     @ParameterizedTest
     @CsvSource({
             "1, 1.1",
             "999, 1.1",
     })
-    public void testRoundTips_WithAmountOfThousandOrMore_AmountShouldIncreasedByTenPercent(BigDecimal amount, BigDecimal multiplier) {
-        log((requirement) -> assertEquals(getExpectedAmount(amount, multiplier), tipService.roundTips(amount)), "The purchase amount must be ten percent more");
+    public void testRoundTips_WithAmountOfThousandOrMore_ResultMustIncreasedByTenPercent(BigDecimal amount, BigDecimal multiplier) {
+        log((requirement) -> assertEquals(0, getExpectedAmount(amount, multiplier).compareTo(tipService.roundTips(amount))), "The purchase amount must be ten percent more");
     }
 }
