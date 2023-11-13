@@ -77,15 +77,21 @@ public class TipServiceTest {
         log((requirement) -> assertEquals(0, BigDecimal.valueOf(0).compareTo(tipService.roundTips(null))), "The purchase amount must be zero");
     }
 
+    @DisplayName("The purchase amount value is less than zero")
+    @Test
+    public void testRoundTips_WithNegativeAmountValue_ResultMustDecreasedByTenPercent() {
+        log((requirement) -> assertEquals(0, BigDecimal.valueOf(-1.1).compareTo(tipService.roundTips(BigDecimal.valueOf(-1)))), "The purchase amount must be ten percent less");
+    }
+
     @Disabled
-    @DisplayName("The purchase amount value is negative")
+    @DisplayName("The purchase amount value is less than zero")
     @Test
     public void testRoundTips_WithNegativeAmountValue_ResultMustBeZero() {
         log((requirement) -> assertEquals(0, BigDecimal.valueOf(0).compareTo(tipService.roundTips(BigDecimal.valueOf(-1)))), "The purchase amount must be zero");
     }
 
     @Disabled
-    @DisplayName("The purchase amount value is negative")
+    @DisplayName("The purchase amount value is less than zero")
     @Test
     public void testRoundTips_WithNegativeAmountValue_ResultMustBeThrowException() {
         log((requirement) -> assertThrows(Exception.class, () -> tipService.roundTips(BigDecimal.valueOf(-1))), "Must throw exception");
