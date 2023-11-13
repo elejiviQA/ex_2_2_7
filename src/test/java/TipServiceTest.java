@@ -1,3 +1,5 @@
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.ot5usk.Tester;
 import org.ot5usk.TipService;
 
@@ -54,5 +56,38 @@ public class TipServiceTest {
     })
     public void testRoundTips_WithAmountOfThousandOrMore_ResultMustIncreasedByTenPercent(BigDecimal amount, BigDecimal multiplier) {
         log((requirement) -> assertEquals(0, getExpectedAmount(amount, multiplier).compareTo(tipService.roundTips(amount))), "The purchase amount must be ten percent more");
+    }
+
+    @DisplayName("The purchase amount value is zero")
+    @Test
+    public void testRoundTips_WithZeroAmountValue_ResultMustBeZero() {
+        log((requirement) -> assertEquals(0, BigDecimal.valueOf(0).compareTo(tipService.roundTips(BigDecimal.valueOf(0)))), "The purchase amount must be zero");
+    }
+
+    @DisplayName("The purchase amount value is null")
+    @Test
+    public void testRoundTips_WithEmptyAmountValue_ResultMustBeThrowException() {
+        log((requirement) -> assertThrows(RuntimeException.class, () -> tipService.roundTips(null)), "Must throw exception");
+    }
+
+    @Disabled
+    @DisplayName("The purchase amount value is null")
+    @Test
+    public void testRoundTips_WithEmptyAmountValue_ResultMustBeZero() {
+        log((requirement) -> assertEquals(0, BigDecimal.valueOf(0).compareTo(tipService.roundTips(null))), "The purchase amount must be zero");
+    }
+
+    @Disabled
+    @DisplayName("The purchase amount value is negative")
+    @Test
+    public void testRoundTips_WithNegativeAmountValue_ResultMustBeZero() {
+        log((requirement) -> assertEquals(0, BigDecimal.valueOf(0).compareTo(tipService.roundTips(BigDecimal.valueOf(-1)))), "The purchase amount must be zero");
+    }
+
+    @Disabled
+    @DisplayName("The purchase amount value is negative")
+    @Test
+    public void testRoundTips_WithNegativeAmountValue_ResultMustBeThrowException() {
+        log((requirement) -> assertThrows(Exception.class, () -> tipService.roundTips(BigDecimal.valueOf(-1))), "Must throw exception");
     }
 }
