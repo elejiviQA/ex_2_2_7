@@ -1,99 +1,63 @@
+import jdk.jfr.Description;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.ot5usk.Tester;
+import org.junit.jupiter.params.provider.CsvFileSource;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.ot5usk.TipService;
 
 import java.math.BigDecimal;
+import java.util.stream.Stream;
 
-import lombok.extern.java.Log;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Log
+@DisplayName("Test roundTips method")
 public class TipServiceTest {
 
     private final TipService tipService = new TipService();
-
-    public void log(Tester helper, String requirement) {
-        AssertionError assertionError = null;
-        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-        try {
-            helper.test(requirement);
-        } catch (AssertionError aErr) {
-            assertionError = aErr;
-        } finally {
-            if (assertionError == null) {
-                log.info("[TEST WAS SUCCESSFUL]: " + "\"" + requirement + "\"\n: " + stackTraceElements[2] + "\n");
-            } else {
-                log.warning("[TEST WAS FAILED]: " + "\"" + requirement + "\"\n: " + stackTraceElements[2] + "\n");
-                throw assertionError;
-            }
-        }
-    }
 
     public BigDecimal getExpectedAmount(BigDecimal amount, BigDecimal multiplier) {
         return amount.multiply(multiplier);
     }
 
-    @DisplayName("Purchase amount value of a thousand rubles or more")
-    @ParameterizedTest
-    @CsvSource({
-            "1000, 1.05",
-            "2000, 1.05",
-    })
-    public void testRoundTips_WithAmountOfThousandOrMore_ResultMustIncreasedByFivePercent(BigDecimal amount, BigDecimal multiplier) {
-        log((requirement) -> assertEquals(0, getExpectedAmount(amount, multiplier).compareTo(tipService.roundTips(amount))), "The purchase amount must be five percent more");
+    @DisplayName("Total purchase amount from positive args")
+    @Description("If the amount is <1000, then 10% is added to it, otherwise 5%")
+    @ParameterizedTest(name = "{2} tip is added to the amount of {0} rubles")
+    @CsvFileSource(resources = "/testData.csv")
+    public void testRoundTipsWithPositiveAmountValues(BigDecimal amount, BigDecimal multiplier, String percent) {
+        assertEquals(getExpectedAmount(amount, multiplier), tipService.roundTips(amount), "The purchase amount must been " + percent + " more");
     }
 
-    @DisplayName("The purchase amount value is less than a thousand rubles")
-    @ParameterizedTest
-    @CsvSource({
-            "1, 1.1",
-            "999, 1.1",
-    })
-    public void testRoundTips_WithAmountOfThousandOrMore_ResultMustIncreasedByTenPercent(BigDecimal amount, BigDecimal multiplier) {
-        log((requirement) -> assertEquals(0, getExpectedAmount(amount, multiplier).compareTo(tipService.roundTips(amount))), "The purchase amount must be ten percent more");
-    }
-
-    @DisplayName("The purchase amount value is zero")
-    @Test
-    public void testRoundTips_WithZeroAmountValue_ResultMustBeZero() {
-        log((requirement) -> assertEquals(0, BigDecimal.valueOf(0).compareTo(tipService.roundTips(BigDecimal.valueOf(0)))), "The purchase amount must be zero");
-    }
-
-    @DisplayName("The purchase amount value is null")
-    @Test
-    public void testRoundTips_WithEmptyAmountValue_ResultMustBeThrowException() {
-        log((requirement) -> assertThrows(RuntimeException.class, () -> tipService.roundTips(null)), "Must throw exception");
+    @DisplayName("Total purchase amount from zero and less zero")
+    @Description("Test calculate")
+    @ParameterizedTest(name = "If {0}, then {1}")
+    @CsvSource({"0, 0", "-1, -1.1"})
+    public void testRoundTipsWithObjectionableAmountValuesAlongTheLowerBorder(BigDecimal amount, BigDecimal result) {
+        assertEquals(result.intValue(), tipService.roundTips(amount).intValue(), "Must been " + result);
     }
 
     @Disabled
-    @DisplayName("The purchase amount value is null")
-    @Test
-    public void testRoundTips_WithEmptyAmountValue_ResultMustBeZero() {
-        log((requirement) -> assertEquals(0, BigDecimal.valueOf(0).compareTo(tipService.roundTips(null))), "The purchase amount must be zero");
+    @DisplayName("Total purchase amount from negative args")
+    @Description("Test catching ex")
+    @ParameterizedTest(name = "If purchase amount value is {0}")
+    @MethodSource("negativeAmountValues")
+    public void testRoundTipsWithNegativeAmountValuesMustThrowException(BigDecimal negativeAmountValue) {
+        assertThrows(RuntimeException.class, () -> tipService.roundTips(negativeAmountValue), "Must throw ex");
     }
 
-    @DisplayName("The purchase amount value is less than zero")
-    @Test
-    public void testRoundTips_WithNegativeAmountValue_ResultMustDecreasedByTenPercent() {
-        log((requirement) -> assertEquals(0, BigDecimal.valueOf(-1.1).compareTo(tipService.roundTips(BigDecimal.valueOf(-1)))), "The purchase amount must be ten percent less");
-    }
 
     @Disabled
-    @DisplayName("The purchase amount value is less than zero")
-    @Test
-    public void testRoundTips_WithNegativeAmountValue_ResultMustBeZero() {
-        log((requirement) -> assertEquals(0, BigDecimal.valueOf(0).compareTo(tipService.roundTips(BigDecimal.valueOf(-1)))), "The purchase amount must be zero");
+    @DisplayName("Total purchase amount from negative args")
+    @Description("Test nullable")
+    @ParameterizedTest(name = "If purchase amount value is {0}")
+    @MethodSource("negativeAmountValues")
+    public void testRoundTipsWithNegativeAmountValuesMustGetZero(BigDecimal negativeAmountValue) {
+        assertEquals(0, tipService.roundTips(negativeAmountValue).intValue(), "Must been 0");
     }
 
-    @Disabled
-    @DisplayName("The purchase amount value is less than zero")
-    @Test
-    public void testRoundTips_WithNegativeAmountValue_ResultMustBeThrowException() {
-        log((requirement) -> assertThrows(Exception.class, () -> tipService.roundTips(BigDecimal.valueOf(-1))), "Must throw exception");
+    static Stream<BigDecimal> negativeAmountValues() {
+        return Stream.of(null, BigDecimal.valueOf(-1));
     }
 }
